@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-
 	"fmt"
 	//"github.com/gin-gonic/gin"
 	//"log"
@@ -32,6 +31,10 @@ type Person struct {
 	username string `json:"username"`
 	department  string `json:"department"`
 	created string `json:"created"`
+}
+
+type Personslice struct {
+	 persons []Person
 }
 
 
@@ -65,8 +68,11 @@ func bookableDate(
 
 func main()  {
 
-	db, _ := sql.Open("mysql", "root:123456@tcp(127.0.0.1:12330)/test?charset=utf8")
+	db,_ := sql.Open("mysql", "root:123456@tcp(127.0.0.1:12330)/test?charset=utf8")
 	//checkErr(err)
+
+	fmt.Println(reflect.TypeOf(db))
+	//fmt.Println(reflect.TypeOf(err))
 
 
 
@@ -99,42 +105,31 @@ func main()  {
 
 
 	//查询数据
-	//rows, err := db.Query("SELECT * FROM userinfo")
-	//defer rows.Close()
-	//if err != nil{
-	//	fmt.Println(err)
-	//}
-	//persons := make([]Person, 0)
-	//for rows.Next() {
-		//var uid int
-		//var username string
-		//var department string
-		//var created string
-		//rows.Scan(&uid, &username, &department, &created)
-		//fmt.Println(uid, username, department, created)
-		//
-		//var person Person
-		//
-		//rows.Scan(&person.uid, &person.username, &person.created, &person.department)
-		//
-		//defer rows.Close()
-		//
-		//
-		//persons = append(persons, person)
+	rows, err := db.Query("SELECT * FROM userinfo")
+	defer rows.Close()
+	if err != nil{
+		fmt.Println(err)
+	}
 
-        //fmt.Println(persons)
+	var single map[string]interface{}
+	var data []map[string]interface{}
+	for rows.Next() {
+		var uid int
+		var username string
+		var department string
+		var created string
+		rows.Scan(&uid, &username, &department, &created)
 
-		//single["uid"] = string(uid)
-		//single["username"] = username
-		//single["department"] = department
-		//single["created"] = created
+		defer rows.Close()
 
-		//fmt.Println(err)
-		//fmt.Println(single)
+		single = make(map[string]interface{})
+		single["uid"] = uid
+		single["username"] = username
+		single["department"] = department
+		single["created"] = created
+		data = append(data, single)
+	}
 
-
-		//break
-	//}
 
 	//fmt.Println(persons)
 
@@ -151,9 +146,31 @@ func main()  {
 
 
 
+	//var m map[string]interface{}
+	//var s []map[string]interface{}
+	//m = make(map[string]interface{})
+	//m["username"] = "user1"
+	//m["age"] = 18
+	//m["sex"] = "man"
+	//s = append(s, m)
+	//m = make(map[string]interface{})
+	//m["username"]="user2"
+	//m["age"]=188
+	//m["sex"]="male"
+	//s=append(s,m)
+	//data, err := json.Marshal(s)
+	//if err != nil {
+	//	fmt.Printf("json.marshal failed,err:", err)
+	//	return
+	//}
+	//fmt.Printf("%s\n", string(data))
 
 
-	// Logging to a file.
+
+
+
+
+	//// Logging to a file.
 	//gin.ForceConsoleColor()
 	//f, _ := os.Create("gin.log")
 	//gin.DefaultWriter = io.MultiWriter(f)
@@ -163,6 +180,7 @@ func main()  {
 	//r.GET("/ping", func(c *gin.Context) {
 	//	c.JSON(200, gin.H{
 	//		"message": "pong",
+	//		"data": data,
 	//	})
 	//})
 	//r.Run() // listen and serve on 0.0.0.0:8080
